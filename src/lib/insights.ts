@@ -74,7 +74,7 @@ export interface StationUsage {
   count: number
 }
 
-export function topStations(rides: Ride[], limit = 5): StationUsage[] {
+export function allStationUsage(rides: Ride[]): StationUsage[] {
   const usage = new Map<string, StationUsage>()
 
   const visit = (code: string | null, name: string | null) => {
@@ -92,7 +92,11 @@ export function topStations(rides: Ride[], limit = 5): StationUsage[] {
     visit(ride.destination_station_code, ride.destination_station)
   }
 
-  return [...usage.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+  return [...usage.values()].sort((a, b) => b.count - a.count)
+}
+
+export function topStations(rides: Ride[], limit = 5): StationUsage[] {
+  return allStationUsage(rides).slice(0, limit)
 }
 
 export interface StationPair {
@@ -116,6 +120,38 @@ export function topStationPairs(rides: Ride[], limit = 5): StationPair[] {
   }
 
   return [...pairs.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+}
+
+export interface StationFlow {
+  originCode: string
+  destinationCode: string
+  originName: string
+  destinationName: string
+  count: number
+}
+
+export function topStationFlows(rides: Ride[], limit = 15): StationFlow[] {
+  const flows = new Map<string, StationFlow>()
+
+  for (const ride of rides) {
+    if (!ride.origin_station_code || !ride.destination_station_code) continue
+    if (ride.origin_station_code === ride.destination_station_code) continue
+    const key = `${ride.origin_station_code}→${ride.destination_station_code}`
+    const existing = flows.get(key)
+    if (existing) {
+      existing.count += 1
+    } else {
+      flows.set(key, {
+        originCode: ride.origin_station_code,
+        destinationCode: ride.destination_station_code,
+        originName: ride.origin_station ?? ride.origin_station_code,
+        destinationName: ride.destination_station ?? ride.destination_station_code,
+        count: 1,
+      })
+    }
+  }
+
+  return [...flows.values()].sort((a, b) => b.count - a.count).slice(0, limit)
 }
 
 export interface RoundTripStats {

@@ -1,4 +1,4 @@
-import type { Ride, RideCost, RideSummary } from './types'
+import type { Ride, RideCost, RideSummary, Station } from './types'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -21,4 +21,9 @@ export function fetchSummary(): Promise<RideSummary> {
 
 export function fetchCost(): Promise<RideCost> {
   return getJson<RideCost>('/rides/cost')
+}
+
+export async function fetchStations(): Promise<Station[]> {
+  const data = await getJson<{ results: Station[] }>('/stations/')
+  return data.results
 }

@@ -42,6 +42,13 @@ export interface RideSummary {
   average_distance_meters: number | null
 }
 
+export interface Station {
+  station_id: string
+  name: string
+  lat: number
+  lon: number
+}
+
 export interface RideCost {
   total_rides: number
   first_ride_date: string | null

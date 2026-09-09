@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRides } from '../composables/useRides'
 import CommuteHeatmap from '../components/insights/CommuteHeatmap.vue'
+import StationMap from '../components/insights/StationMap.vue'
 import StationLeaderboard from '../components/insights/StationLeaderboard.vue'
 import SeasonalityChart from '../components/insights/SeasonalityChart.vue'
 import HardcoreFactor from '../components/insights/HardcoreFactor.vue'
@@ -27,6 +28,9 @@ const { rides, loading, error } = useRides()
     <div v-else class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div class="sm:col-span-2">
         <CommuteHeatmap :rides="rides" />
+      </div>
+      <div class="sm:col-span-2">
+        <StationMap :rides="rides" />
       </div>
       <StationLeaderboard :rides="rides" />
       <SeasonalityChart :rides="rides" />
