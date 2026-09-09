@@ -214,17 +214,34 @@ export interface HardcoreStats {
   hardcorePercentage: number
 }
 
-const COLD_THRESHOLD_C = 5
+export const COLD_THRESHOLD_C = 5
+
+export function isRainRide(ride: Ride): boolean {
+  return (ride.weather?.rain_mm ?? 0) > 0
+}
+
+export function isColdRide(ride: Ride): boolean {
+  return (ride.weather?.temperature_c ?? Infinity) < COLD_THRESHOLD_C
+}
+
+export interface RideHardcoreTags {
+  rain: boolean
+  cold: boolean
+  isHardcore: boolean
+}
+
+export function rideHardcoreTags(ride: Ride): RideHardcoreTags {
+  const rain = isRainRide(ride)
+  const cold = isColdRide(ride)
+  return { rain, cold, isHardcore: rain || cold }
+}
 
 export function hardcoreStats(rides: Ride[]): HardcoreStats {
   const withWeather = rides.filter((ride) => ride.weather !== null)
 
-  const isRain = (ride: Ride) => (ride.weather?.rain_mm ?? 0) > 0
-  const isCold = (ride: Ride) => (ride.weather?.temperature_c ?? Infinity) < COLD_THRESHOLD_C
-
-  const rainRides = withWeather.filter(isRain).length
-  const coldRides = withWeather.filter(isCold).length
-  const hardcoreRides = withWeather.filter((ride) => isRain(ride) || isCold(ride)).length
+  const rainRides = withWeather.filter(isRainRide).length
+  const coldRides = withWeather.filter(isColdRide).length
+  const hardcoreRides = withWeather.filter((ride) => isRainRide(ride) || isColdRide(ride)).length
 
   const total = withWeather.length
   return {

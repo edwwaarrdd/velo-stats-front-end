@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useRides } from '../composables/useRides'
 import StatTile from '../components/StatTile.vue'
+import { COLD_THRESHOLD_C, rideHardcoreTags } from '../lib/insights'
 import {
   formatDate,
   formatDistance,
@@ -25,6 +26,14 @@ const pace = computed(() => {
 })
 
 const weatherInfo = computed(() => weatherCodeInfo(ride.value?.weather?.weather_code ?? null))
+const hardcore = computed(() => (ride.value ? rideHardcoreTags(ride.value) : null))
+const hardcoreReasons = computed(() => {
+  if (!hardcore.value) return []
+  const reasons: string[] = []
+  if (hardcore.value.rain) reasons.push('rode in rain')
+  if (hardcore.value.cold) reasons.push(`rode below ${COLD_THRESHOLD_C}°C`)
+  return reasons
+})
 </script>
 
 <template>
@@ -76,7 +85,16 @@ const weatherInfo = computed(() => weatherCodeInfo(ride.value?.weather?.weather_
       </div>
 
       <div class="mt-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Weather</h2>
+        <div class="flex items-center justify-between gap-2">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Weather</h2>
+          <span
+            v-if="hardcore?.isHardcore"
+            class="inline-flex items-center gap-1 rounded-full bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700 ring-1 ring-orange-200"
+            :title="`Hardcore ride: ${hardcoreReasons.join(', ')}`"
+          >
+            💪 Hardcore ride
+          </span>
+        </div>
 
         <div v-if="!ride.weather" class="mt-3 text-sm text-slate-400">
           No weather data cached for this trip.
@@ -89,6 +107,9 @@ const weatherInfo = computed(() => weatherCodeInfo(ride.value?.weather?.weather_
             <span class="text-sm font-normal text-slate-400">feels like {{ ride.weather.apparent_temperature_c?.toFixed(1) ?? '—' }}°C</span>
           </div>
           <p class="text-sm text-slate-500">{{ weatherInfo.label }} · observed {{ formatTime(ride.weather.observed_at) }}</p>
+          <p v-if="hardcore?.isHardcore" class="mt-1 text-sm text-orange-600">
+            You {{ hardcoreReasons.join(' and ') }} on this one.
+          </p>
 
           <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-3">
             <div>
