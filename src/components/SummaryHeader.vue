@@ -17,7 +17,10 @@ function averageSpeed(summary: RideSummary): number | null {
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-slate-900">🚲 Velo Stats</h1>
+    <div class="flex flex-wrap items-baseline justify-between gap-2">
+      <h1 class="text-2xl font-bold text-slate-900">🚲 Velo Stats</h1>
+      <router-link to="/insights" class="text-sm font-medium text-sky-600 hover:text-sky-700">📊 View insights →</router-link>
+    </div>
     <p class="mt-1 text-sm text-slate-500">A look back at every ride, one summary tile at a time.</p>
 
     <div v-if="loading" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

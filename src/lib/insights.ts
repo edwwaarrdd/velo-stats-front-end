@@ -1,0 +1,270 @@
+import type { Ride } from '../api/types'
+
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const FULL_DAY_LABELS = [
+  'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays',
+]
+const MONTH_LABELS = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+]
+const WINTER_MONTHS = new Set([12, 1, 2])
+
+export interface HeatmapCell {
+  day: number
+  hour: number
+  count: number
+}
+
+export interface CommuteSignature {
+  cells: HeatmapCell[]
+  maxCount: number
+  weekdayRides: number
+  weekendRides: number
+  peak: { day: number; hour: number; count: number } | null
+}
+
+export function commuteSignature(rides: Ride[]): CommuteSignature {
+  const cells: HeatmapCell[] = []
+  const countByKey = new Map<string, number>()
+
+  for (const ride of rides) {
+    const date = new Date(ride.checkout_time)
+    const day = date.getDay()
+    const hour = date.getHours()
+    const key = `${day}-${hour}`
+    countByKey.set(key, (countByKey.get(key) ?? 0) + 1)
+  }
+
+  let maxCount = 0
+  let peak: CommuteSignature['peak'] = null
+  let weekdayRides = 0
+  let weekendRides = 0
+
+  for (let day = 0; day < 7; day++) {
+    for (let hour = 0; hour < 24; hour++) {
+      const count = countByKey.get(`${day}-${hour}`) ?? 0
+      cells.push({ day, hour, count })
+      if (count > maxCount) {
+        maxCount = count
+        peak = { day, hour, count }
+      }
+      if (day === 0 || day === 6) {
+        weekendRides += count
+      } else {
+        weekdayRides += count
+      }
+    }
+  }
+
+  return { cells, maxCount, weekdayRides, weekendRides, peak }
+}
+
+export function dayLabel(day: number): string {
+  return DAY_LABELS[day]
+}
+
+export function fullDayLabel(day: number): string {
+  return FULL_DAY_LABELS[day]
+}
+
+export interface StationUsage {
+  code: string
+  name: string
+  count: number
+}
+
+export function topStations(rides: Ride[], limit = 5): StationUsage[] {
+  const usage = new Map<string, StationUsage>()
+
+  const visit = (code: string | null, name: string | null) => {
+    if (!code) return
+    const existing = usage.get(code)
+    if (existing) {
+      existing.count += 1
+    } else {
+      usage.set(code, { code, name: name ?? code, count: 1 })
+    }
+  }
+
+  for (const ride of rides) {
+    visit(ride.origin_station_code, ride.origin_station)
+    visit(ride.destination_station_code, ride.destination_station)
+  }
+
+  return [...usage.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+}
+
+export interface StationPair {
+  origin: string
+  destination: string
+  count: number
+}
+
+export function topStationPairs(rides: Ride[], limit = 5): StationPair[] {
+  const pairs = new Map<string, StationPair>()
+
+  for (const ride of rides) {
+    if (!ride.origin_station || !ride.destination_station) continue
+    const key = `${ride.origin_station}→${ride.destination_station}`
+    const existing = pairs.get(key)
+    if (existing) {
+      existing.count += 1
+    } else {
+      pairs.set(key, { origin: ride.origin_station, destination: ride.destination_station, count: 1 })
+    }
+  }
+
+  return [...pairs.values()].sort((a, b) => b.count - a.count).slice(0, limit)
+}
+
+export interface RoundTripStats {
+  count: number
+  percentage: number
+  topStations: StationUsage[]
+}
+
+export function roundTripStats(rides: Ride[]): RoundTripStats {
+  const roundTrips = rides.filter(
+    (ride) => ride.origin_station_code !== null && ride.origin_station_code === ride.destination_station_code,
+  )
+
+  const usage = new Map<string, StationUsage>()
+  for (const ride of roundTrips) {
+    if (!ride.origin_station_code) continue
+    const existing = usage.get(ride.origin_station_code)
+    if (existing) {
+      existing.count += 1
+    } else {
+      usage.set(ride.origin_station_code, {
+        code: ride.origin_station_code,
+        name: ride.origin_station ?? ride.origin_station_code,
+        count: 1,
+      })
+    }
+  }
+
+  return {
+    count: roundTrips.length,
+    percentage: rides.length > 0 ? (roundTrips.length / rides.length) * 100 : 0,
+    topStations: [...usage.values()].sort((a, b) => b.count - a.count).slice(0, 3),
+  }
+}
+
+export interface MonthlyDistance {
+  key: string
+  label: string
+  totalMeters: number
+  rideCount: number
+}
+
+export function monthlyDistance(rides: Ride[]): MonthlyDistance[] {
+  const months = new Map<string, MonthlyDistance>()
+
+  for (const ride of rides) {
+    const date = new Date(ride.checkout_time)
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const key = `${year}-${String(month).padStart(2, '0')}`
+    const label = `${MONTH_LABELS[month - 1]} ${year}`
+
+    const existing = months.get(key)
+    const meters = ride.distance_meters ?? 0
+    if (existing) {
+      existing.totalMeters += meters
+      existing.rideCount += 1
+    } else {
+      months.set(key, { key, label, totalMeters: meters, rideCount: 1 })
+    }
+  }
+
+  return [...months.values()].sort((a, b) => a.key.localeCompare(b.key))
+}
+
+export function bestMonth(months: MonthlyDistance[]): MonthlyDistance | null {
+  if (months.length === 0) return null
+  return months.reduce((best, month) => (month.totalMeters > best.totalMeters ? month : best))
+}
+
+export interface WinterStats {
+  rideCount: number
+  totalMeters: number
+  totalDuration: number
+  percentageOfRides: number
+}
+
+export function winterStats(rides: Ride[]): WinterStats {
+  const winterRides = rides.filter((ride) => WINTER_MONTHS.has(new Date(ride.checkout_time).getMonth() + 1))
+
+  return {
+    rideCount: winterRides.length,
+    totalMeters: winterRides.reduce((sum, ride) => sum + (ride.distance_meters ?? 0), 0),
+    totalDuration: winterRides.reduce((sum, ride) => sum + (ride.duration ?? 0), 0),
+    percentageOfRides: rides.length > 0 ? (winterRides.length / rides.length) * 100 : 0,
+  }
+}
+
+export interface HardcoreStats {
+  rainRides: number
+  coldRides: number
+  hardcoreRides: number
+  totalWithWeather: number
+  rainPercentage: number
+  coldPercentage: number
+  hardcorePercentage: number
+}
+
+const COLD_THRESHOLD_C = 5
+
+export function hardcoreStats(rides: Ride[]): HardcoreStats {
+  const withWeather = rides.filter((ride) => ride.weather !== null)
+
+  const isRain = (ride: Ride) => (ride.weather?.rain_mm ?? 0) > 0
+  const isCold = (ride: Ride) => (ride.weather?.temperature_c ?? Infinity) < COLD_THRESHOLD_C
+
+  const rainRides = withWeather.filter(isRain).length
+  const coldRides = withWeather.filter(isCold).length
+  const hardcoreRides = withWeather.filter((ride) => isRain(ride) || isCold(ride)).length
+
+  const total = withWeather.length
+  return {
+    rainRides,
+    coldRides,
+    hardcoreRides,
+    totalWithWeather: total,
+    rainPercentage: total > 0 ? (rainRides / total) * 100 : 0,
+    coldPercentage: total > 0 ? (coldRides / total) * 100 : 0,
+    hardcorePercentage: total > 0 ? (hardcoreRides / total) * 100 : 0,
+  }
+}
+
+export interface BikeUsage {
+  bike: string
+  count: number
+}
+
+export interface BikeStats {
+  uniqueBikes: number
+  repeatedBikes: number
+  mostRidden: BikeUsage | null
+  topBikes: BikeUsage[]
+}
+
+export function bikeStats(rides: Ride[]): BikeStats {
+  const counts = new Map<string, number>()
+  for (const ride of rides) {
+    if (!ride.bike_number) continue
+    counts.set(ride.bike_number, (counts.get(ride.bike_number) ?? 0) + 1)
+  }
+
+  const usages = [...counts.entries()]
+    .map(([bike, count]) => ({ bike, count }))
+    .sort((a, b) => b.count - a.count)
+
+  return {
+    uniqueBikes: usages.length,
+    repeatedBikes: usages.filter((usage) => usage.count > 1).length,
+    mostRidden: usages[0] ?? null,
+    topBikes: usages.slice(0, 5),
+  }
+}
