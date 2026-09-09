@@ -5,6 +5,7 @@ import StationMap from '../components/insights/StationMap.vue'
 import StationLeaderboard from '../components/insights/StationLeaderboard.vue'
 import SeasonalityChart from '../components/insights/SeasonalityChart.vue'
 import HardcoreFactor from '../components/insights/HardcoreFactor.vue'
+import RouterComparison from '../components/insights/RouterComparison.vue'
 import BikeStats from '../components/insights/BikeStats.vue'
 
 const { rides, loading, error } = useRides()
@@ -35,6 +36,7 @@ const { rides, loading, error } = useRides()
       <StationLeaderboard :rides="rides" />
       <SeasonalityChart :rides="rides" />
       <HardcoreFactor :rides="rides" />
+      <RouterComparison :rides="rides" />
       <BikeStats :rides="rides" />
     </div>
   </div>
