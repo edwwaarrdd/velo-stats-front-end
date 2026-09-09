@@ -51,9 +51,6 @@ const badgeStyles: Record<string, string> = {
       >
         {{ badge.icon }} {{ badge.label }}
       </span>
-      <span v-else class="rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">
-        Completed
-      </span>
     </div>
 
     <p class="mt-1 text-xs text-slate-500">{{ formatDateTime(ride.checkout_time) }}</p>

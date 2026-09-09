@@ -344,9 +344,6 @@ export interface ExpectedTimeStats {
   averageDeltaSeconds: number
 }
 
-/**
- * How often, and by how much, the rides beat the router's expected ride time.
- */
 export function expectedTimeStats(rides: Ride[]): ExpectedTimeStats {
   const comparisons = rides
     .map(expectedTimeComparison)
