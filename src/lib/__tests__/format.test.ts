@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { formatDistance, formatDuration, formatEur, formatSpeed, weatherCodeInfo } from '../format'
+import {
+  formatDistance,
+  formatDuration,
+  formatEur,
+  formatSeconds,
+  formatSpeed,
+  weatherCodeInfo,
+} from '../format'
 
 describe('formatDuration', () => {
   it('returns an em dash for null', () => {
@@ -68,5 +75,23 @@ describe('weatherCodeInfo', () => {
   it('looks up a known WMO weather code', () => {
     expect(weatherCodeInfo(0)).toEqual({ label: 'Clear sky', icon: '☀️' })
     expect(weatherCodeInfo(95)).toEqual({ label: 'Thunderstorm', icon: '⛈️' })
+  })
+})
+
+describe('formatSeconds', () => {
+  it('returns an em dash for null', () => {
+    expect(formatSeconds(null)).toBe('—')
+  })
+
+  it('formats a value under a minute in seconds', () => {
+    expect(formatSeconds(45)).toBe('45s')
+  })
+
+  it('formats a longer value as minutes and padded seconds', () => {
+    expect(formatSeconds(508)).toBe('8m 28s')
+  })
+
+  it('keeps the sign of a negative value', () => {
+    expect(formatSeconds(-100)).toBe('-1m 40s')
   })
 })

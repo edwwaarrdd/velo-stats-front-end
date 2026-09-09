@@ -307,6 +307,66 @@ export function hardcoreStats(rides: Ride[]): HardcoreStats {
   }
 }
 
+export interface ExpectedTimeComparison {
+  expectedSeconds: number
+  actualSeconds: number
+  deltaSeconds: number
+  percentage: number
+  faster: boolean
+}
+
+/**
+ * Compares how long the ride actually took against the time the OSRM router
+ * expects for the same route. A negative delta means faster than expected.
+ */
+export function expectedTimeComparison(ride: Ride): ExpectedTimeComparison | null {
+  const expectedSeconds = ride.expected_duration_seconds
+  const actualSeconds = ride.actual_duration_seconds
+  const deltaSeconds = ride.duration_vs_expected_seconds
+
+  if (expectedSeconds === null || actualSeconds === null || deltaSeconds === null) return null
+  if (expectedSeconds <= 0) return null
+
+  return {
+    expectedSeconds,
+    actualSeconds,
+    deltaSeconds,
+    percentage: (deltaSeconds / expectedSeconds) * 100,
+    faster: deltaSeconds < 0,
+  }
+}
+
+export interface ExpectedTimeStats {
+  ridesCompared: number
+  fasterRides: number
+  slowerRides: number
+  fasterPercentage: number
+  averageDeltaSeconds: number
+}
+
+/**
+ * How often, and by how much, the rides beat the router's expected ride time.
+ */
+export function expectedTimeStats(rides: Ride[]): ExpectedTimeStats {
+  const comparisons = rides
+    .map(expectedTimeComparison)
+    .filter((comparison): comparison is ExpectedTimeComparison => comparison !== null)
+
+  const fasterRides = comparisons.filter((comparison) => comparison.faster).length
+  const total = comparisons.length
+
+  return {
+    ridesCompared: total,
+    fasterRides,
+    slowerRides: total - fasterRides,
+    fasterPercentage: total > 0 ? (fasterRides / total) * 100 : 0,
+    averageDeltaSeconds:
+      total > 0
+        ? comparisons.reduce((sum, comparison) => sum + comparison.deltaSeconds, 0) / total
+        : 0,
+  }
+}
+
 export interface BikeUsage {
   bike: string
   count: number

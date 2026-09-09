@@ -5,6 +5,8 @@ import {
   bikeStats,
   commuteSignature,
   computeRideBadges,
+  expectedTimeComparison,
+  expectedTimeStats,
   hardcoreStats,
   isColdRide,
   isHotRide,
@@ -316,5 +318,95 @@ describe('computeRideBadges', () => {
     expect(badges.get(hardcoreRide.ride_id)?.key).toBe('hardcore')
     expect(badges.get(roundTripRide.ride_id)?.key).toBe('round-trip')
     expect(badges.get(plainRide.ride_id)).toBeUndefined()
+  })
+})
+
+describe('expectedTimeComparison', () => {
+  it('reports a ride that beat the expected time as faster', () => {
+    const comparison = expectedTimeComparison(
+      makeRide({
+        expected_duration_seconds: 400,
+        actual_duration_seconds: 300,
+        duration_vs_expected_seconds: -100,
+      }),
+    )
+
+    expect(comparison).not.toBeNull()
+    expect(comparison!.faster).toBe(true)
+    expect(comparison!.deltaSeconds).toBe(-100)
+    expect(comparison!.percentage).toBeCloseTo(-25)
+  })
+
+  it('reports a ride that took longer as slower', () => {
+    const comparison = expectedTimeComparison(
+      makeRide({
+        expected_duration_seconds: 400,
+        actual_duration_seconds: 500,
+        duration_vs_expected_seconds: 100,
+      }),
+    )
+
+    expect(comparison!.faster).toBe(false)
+    expect(comparison!.percentage).toBeCloseTo(25)
+  })
+
+  it('returns null when no route is cached for the ride', () => {
+    const comparison = expectedTimeComparison(
+      makeRide({
+        expected_duration_seconds: null,
+        actual_duration_seconds: 300,
+        duration_vs_expected_seconds: null,
+      }),
+    )
+
+    expect(comparison).toBeNull()
+  })
+
+  it('returns null when the expected time is zero, to avoid dividing by it', () => {
+    const comparison = expectedTimeComparison(
+      makeRide({
+        expected_duration_seconds: 0,
+        actual_duration_seconds: 300,
+        duration_vs_expected_seconds: 300,
+      }),
+    )
+
+    expect(comparison).toBeNull()
+  })
+})
+
+describe('expectedTimeStats', () => {
+  it('counts faster and slower rides and averages the delta', () => {
+    const stats = expectedTimeStats([
+      makeRide({
+        expected_duration_seconds: 400,
+        actual_duration_seconds: 300,
+        duration_vs_expected_seconds: -100,
+      }),
+      makeRide({
+        expected_duration_seconds: 400,
+        actual_duration_seconds: 700,
+        duration_vs_expected_seconds: 300,
+      }),
+      makeRide({
+        expected_duration_seconds: null,
+        actual_duration_seconds: 300,
+        duration_vs_expected_seconds: null,
+      }),
+    ])
+
+    expect(stats.ridesCompared).toBe(2)
+    expect(stats.fasterRides).toBe(1)
+    expect(stats.slowerRides).toBe(1)
+    expect(stats.fasterPercentage).toBe(50)
+    expect(stats.averageDeltaSeconds).toBe(100)
+  })
+
+  it('returns zeroed stats when nothing can be compared', () => {
+    const stats = expectedTimeStats([])
+
+    expect(stats.ridesCompared).toBe(0)
+    expect(stats.fasterPercentage).toBe(0)
+    expect(stats.averageDeltaSeconds).toBe(0)
   })
 })

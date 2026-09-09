@@ -29,6 +29,9 @@ export interface Ride {
   checkin_time: string | null
   distance_meters: number | null
   speed_kmh: number | null
+  expected_duration_seconds: number | null
+  actual_duration_seconds: number | null
+  duration_vs_expected_seconds: number | null
   weather: Weather | null
 }
 

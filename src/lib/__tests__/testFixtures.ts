@@ -38,6 +38,9 @@ export function makeRide(overrides: Partial<Ride> = {}): Ride {
     checkin_time: '2026-06-01T12:10:00Z',
     distance_meters: 2000,
     speed_kmh: 12,
+    expected_duration_seconds: 500,
+    actual_duration_seconds: 600,
+    duration_vs_expected_seconds: 100,
     weather: makeWeather(),
     ...overrides,
   }

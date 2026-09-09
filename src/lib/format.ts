@@ -12,6 +12,16 @@ export function formatDistance(meters: number | null): string {
   return `${(meters / 1000).toFixed(2)} km`
 }
 
+export function formatSeconds(seconds: number | null): string {
+  if (seconds === null) return '—'
+  const total = Math.round(Math.abs(seconds))
+  const minutes = Math.floor(total / 60)
+  const rest = total % 60
+  const sign = seconds < 0 ? '-' : ''
+  if (minutes === 0) return `${sign}${rest}s`
+  return `${sign}${minutes}m ${String(rest).padStart(2, '0')}s`
+}
+
 export function formatSpeed(kmh: number | null): string {
   if (kmh === null) return '—'
   return `${kmh.toFixed(1)} km/h`
