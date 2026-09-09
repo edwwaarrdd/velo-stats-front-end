@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import type { Ride } from '../api/types'
+import type { RideBadge } from '../lib/insights'
 import { formatDateTime, formatDistance, formatDuration, formatSpeed } from '../lib/format'
 import WeatherBadge from './WeatherBadge.vue'
 
-const props = defineProps<{ ride: Ride }>()
+const props = defineProps<{ ride: Ride; badge?: RideBadge }>()
 const router = useRouter()
 
 function openDetail() {
   router.push({ name: 'ride-detail', params: { rideId: props.ride.ride_id } })
 }
 
-const statusStyles: Record<string, string> = {
-  Completed: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+const badgeStyles: Record<string, string> = {
+  fastest: 'bg-amber-50 text-amber-700 ring-amber-200',
+  slowest: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
+  longest: 'bg-purple-50 text-purple-700 ring-purple-200',
+  shortest: 'bg-purple-50 text-purple-700 ring-purple-200',
+  hardcore: 'bg-orange-50 text-orange-700 ring-orange-200',
+  'round-trip': 'bg-sky-50 text-sky-700 ring-sky-200',
 }
 </script>
 
@@ -29,10 +35,20 @@ const statusStyles: Record<string, string> = {
         <span>{{ ride.destination_station ?? 'Unknown station' }}</span>
       </div>
       <span
-        class="rounded-full px-2 py-0.5 text-xs font-medium ring-1"
-        :class="statusStyles[ride.status] ?? 'bg-slate-100 text-slate-600 ring-slate-200'"
+        v-if="ride.status !== 'Completed'"
+        class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200"
       >
         {{ ride.status }}
+      </span>
+      <span
+        v-else-if="badge"
+        class="rounded-full px-2 py-0.5 text-xs font-medium ring-1"
+        :class="badgeStyles[badge.key]"
+      >
+        {{ badge.icon }} {{ badge.label }}
+      </span>
+      <span v-else class="rounded-full px-2 py-0.5 text-xs font-medium ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200">
+        Completed
       </span>
     </div>
 

@@ -13,7 +13,7 @@ const stats = computed(() => hardcoreStats(props.rides))
     <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Hardcore factor</h2>
     <p class="mt-1 text-sm text-slate-500">Rides in less-than-ideal conditions (of {{ stats.totalWithWeather }} with weather data).</p>
 
-    <div class="mt-4 grid grid-cols-3 gap-3 text-center">
+    <div class="mt-4 grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
       <div>
         <p class="text-2xl font-semibold text-slate-900">{{ stats.rainRides }}</p>
         <p class="text-xs text-slate-500">🌧️ in rain</p>
@@ -23,6 +23,11 @@ const stats = computed(() => hardcoreStats(props.rides))
         <p class="text-2xl font-semibold text-slate-900">{{ stats.coldRides }}</p>
         <p class="text-xs text-slate-500">🥶 below 5°C</p>
         <p class="text-xs text-slate-400">{{ stats.coldPercentage.toFixed(1) }}%</p>
+      </div>
+      <div>
+        <p class="text-2xl font-semibold text-slate-900">{{ stats.hotRides }}</p>
+        <p class="text-xs text-slate-500">🥵 above 30°C</p>
+        <p class="text-xs text-slate-400">{{ stats.hotPercentage.toFixed(1) }}%</p>
       </div>
       <div>
         <p class="text-2xl font-semibold text-emerald-600">{{ stats.hardcorePercentage.toFixed(0) }}%</p>

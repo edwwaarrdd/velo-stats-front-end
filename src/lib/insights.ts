@@ -160,10 +160,12 @@ export interface RoundTripStats {
   topStations: StationUsage[]
 }
 
+export function isRoundTrip(ride: Ride): boolean {
+  return ride.origin_station_code !== null && ride.origin_station_code === ride.destination_station_code
+}
+
 export function roundTripStats(rides: Ride[]): RoundTripStats {
-  const roundTrips = rides.filter(
-    (ride) => ride.origin_station_code !== null && ride.origin_station_code === ride.destination_station_code,
-  )
+  const roundTrips = rides.filter(isRoundTrip)
 
   const usage = new Map<string, StationUsage>()
   for (const ride of roundTrips) {
@@ -243,14 +245,17 @@ export function winterStats(rides: Ride[]): WinterStats {
 export interface HardcoreStats {
   rainRides: number
   coldRides: number
+  hotRides: number
   hardcoreRides: number
   totalWithWeather: number
   rainPercentage: number
   coldPercentage: number
+  hotPercentage: number
   hardcorePercentage: number
 }
 
 export const COLD_THRESHOLD_C = 5
+export const HOT_THRESHOLD_C = 30
 
 export function isRainRide(ride: Ride): boolean {
   return (ride.weather?.rain_mm ?? 0) > 0
@@ -260,16 +265,22 @@ export function isColdRide(ride: Ride): boolean {
   return (ride.weather?.temperature_c ?? Infinity) < COLD_THRESHOLD_C
 }
 
+export function isHotRide(ride: Ride): boolean {
+  return (ride.weather?.temperature_c ?? -Infinity) > HOT_THRESHOLD_C
+}
+
 export interface RideHardcoreTags {
   rain: boolean
   cold: boolean
+  hot: boolean
   isHardcore: boolean
 }
 
 export function rideHardcoreTags(ride: Ride): RideHardcoreTags {
   const rain = isRainRide(ride)
   const cold = isColdRide(ride)
-  return { rain, cold, isHardcore: rain || cold }
+  const hot = isHotRide(ride)
+  return { rain, cold, hot, isHardcore: rain || cold || hot }
 }
 
 export function hardcoreStats(rides: Ride[]): HardcoreStats {
@@ -277,16 +288,21 @@ export function hardcoreStats(rides: Ride[]): HardcoreStats {
 
   const rainRides = withWeather.filter(isRainRide).length
   const coldRides = withWeather.filter(isColdRide).length
-  const hardcoreRides = withWeather.filter((ride) => isRainRide(ride) || isColdRide(ride)).length
+  const hotRides = withWeather.filter(isHotRide).length
+  const hardcoreRides = withWeather.filter(
+    (ride) => isRainRide(ride) || isColdRide(ride) || isHotRide(ride),
+  ).length
 
   const total = withWeather.length
   return {
     rainRides,
     coldRides,
+    hotRides,
     hardcoreRides,
     totalWithWeather: total,
     rainPercentage: total > 0 ? (rainRides / total) * 100 : 0,
     coldPercentage: total > 0 ? (coldRides / total) * 100 : 0,
+    hotPercentage: total > 0 ? (hotRides / total) * 100 : 0,
     hardcorePercentage: total > 0 ? (hardcoreRides / total) * 100 : 0,
   }
 }
@@ -320,4 +336,68 @@ export function bikeStats(rides: Ride[]): BikeStats {
     mostRidden: usages[0] ?? null,
     topBikes: usages.slice(0, 5),
   }
+}
+
+export interface RideBadge {
+  key: string
+  label: string
+  icon: string
+}
+
+const RIDE_BADGE_PRIORITY: Array<(ride: Ride, ctx: SuperlativeIds) => RideBadge | null> = [
+  (ride, ctx) => (ride.ride_id === ctx.fastest ? { key: 'fastest', label: 'Fastest ride', icon: '⚡' } : null),
+  (ride, ctx) => (ride.ride_id === ctx.slowest ? { key: 'slowest', label: 'Slowest ride', icon: '🐌' } : null),
+  (ride, ctx) => (ride.ride_id === ctx.longest ? { key: 'longest', label: 'Longest ride', icon: '📏' } : null),
+  (ride, ctx) => (ride.ride_id === ctx.shortest ? { key: 'shortest', label: 'Shortest ride', icon: '🤏' } : null),
+  (ride) => (rideHardcoreTags(ride).isHardcore ? { key: 'hardcore', label: 'Hardcore ride', icon: '💪' } : null),
+  (ride) => (isRoundTrip(ride) ? { key: 'round-trip', label: 'Round trip', icon: '🔄' } : null),
+]
+
+interface SuperlativeIds {
+  fastest: number | null
+  slowest: number | null
+  longest: number | null
+  shortest: number | null
+}
+
+function findExtreme(rides: Ride[], key: 'speed_kmh' | 'distance_meters', direction: 'max' | 'min'): number | null {
+  let bestId: number | null = null
+  let bestValue: number | null = null
+
+  for (const ride of rides) {
+    const value = ride[key]
+    if (value === null || value <= 0) continue
+    if (
+      bestValue === null ||
+      (direction === 'max' && value > bestValue) ||
+      (direction === 'min' && value < bestValue)
+    ) {
+      bestValue = value
+      bestId = ride.ride_id
+    }
+  }
+
+  return bestId
+}
+
+export function computeRideBadges(rides: Ride[]): Map<number, RideBadge> {
+  const ctx: SuperlativeIds = {
+    fastest: findExtreme(rides, 'speed_kmh', 'max'),
+    slowest: findExtreme(rides, 'speed_kmh', 'min'),
+    longest: findExtreme(rides, 'distance_meters', 'max'),
+    shortest: findExtreme(rides, 'distance_meters', 'min'),
+  }
+
+  const badges = new Map<number, RideBadge>()
+  for (const ride of rides) {
+    for (const rule of RIDE_BADGE_PRIORITY) {
+      const badge = rule(ride, ctx)
+      if (badge) {
+        badges.set(ride.ride_id, badge)
+        break
+      }
+    }
+  }
+
+  return badges
 }

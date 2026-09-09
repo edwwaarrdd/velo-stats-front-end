@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useRides } from '../composables/useRides'
 import StatTile from '../components/StatTile.vue'
-import { COLD_THRESHOLD_C, rideHardcoreTags } from '../lib/insights'
+import { COLD_THRESHOLD_C, HOT_THRESHOLD_C, rideHardcoreTags } from '../lib/insights'
 import {
   formatDate,
   formatDistance,
@@ -32,6 +32,7 @@ const hardcoreReasons = computed(() => {
   const reasons: string[] = []
   if (hardcore.value.rain) reasons.push('rode in rain')
   if (hardcore.value.cold) reasons.push(`rode below ${COLD_THRESHOLD_C}°C`)
+  if (hardcore.value.hot) reasons.push(`rode above ${HOT_THRESHOLD_C}°C`)
   return reasons
 })
 </script>

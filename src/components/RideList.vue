@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { Ride } from '../api/types'
+import { computeRideBadges } from '../lib/insights'
 import RideCard from './RideCard.vue'
 
-defineProps<{
+const props = defineProps<{
   rides: Ride[]
   loading: boolean
   error: string | null
 }>()
+
+const badges = computed(() => computeRideBadges(props.rides))
 </script>
 
 <template>
@@ -24,7 +28,7 @@ defineProps<{
     </p>
 
     <div v-else class="space-y-3">
-      <RideCard v-for="ride in rides" :key="ride.ride_id" :ride="ride" />
+      <RideCard v-for="ride in rides" :key="ride.ride_id" :ride="ride" :badge="badges.get(ride.ride_id)" />
     </div>
   </div>
 </template>
