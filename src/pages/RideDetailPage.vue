@@ -4,11 +4,17 @@ import { useRoute } from 'vue-router'
 import { useRides } from '../composables/useRides'
 import StatTile from '../components/StatTile.vue'
 import RideRouteMap from '../components/RideRouteMap.vue'
-import { COLD_THRESHOLD_C, HOT_THRESHOLD_C, rideHardcoreTags } from '../lib/insights'
+import {
+  COLD_THRESHOLD_C,
+  HOT_THRESHOLD_C,
+  expectedTimeComparison,
+  rideHardcoreTags,
+} from '../lib/insights'
 import {
   formatDate,
   formatDistance,
   formatDuration,
+  formatSeconds,
   formatSpeed,
   formatTime,
   weatherCodeInfo,
@@ -25,6 +31,8 @@ const pace = computed(() => {
   if (!r || !r.distance_meters || !r.duration) return null
   return r.duration / (r.distance_meters / 1000)
 })
+
+const vsExpected = computed(() => (ride.value ? expectedTimeComparison(ride.value) : null))
 
 const weatherInfo = computed(() => weatherCodeInfo(ride.value?.weather?.weather_code ?? null))
 const hardcore = computed(() => (ride.value ? rideHardcoreTags(ride.value) : null))
@@ -84,6 +92,40 @@ const hardcoreReasons = computed(() => {
         <StatTile label="Distance" :value="formatDistance(ride.distance_meters)" />
         <StatTile label="Speed" :value="formatSpeed(ride.speed_kmh)" />
         <StatTile label="Pace" :value="pace ? `${pace.toFixed(1)} min/km` : '—'" />
+      </div>
+
+      <div class="mt-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Versus the expected ride time</h2>
+
+        <p v-if="!vsExpected" class="mt-3 text-sm text-slate-400">
+          No cached route for this trip, so there is nothing to compare against.
+        </p>
+
+        <div v-else>
+          <p
+            class="mt-2 text-2xl font-semibold"
+            :class="vsExpected.faster ? 'text-emerald-600' : 'text-rose-600'"
+          >
+            {{ vsExpected.faster ? '🏁' : '🐢' }}
+            {{ formatSeconds(Math.abs(vsExpected.deltaSeconds)) }}
+            {{ vsExpected.faster ? 'faster' : 'slower' }}
+          </p>
+          <p class="text-sm text-slate-500">
+            {{ Math.abs(vsExpected.percentage).toFixed(1) }}%
+            {{ vsExpected.faster ? 'under' : 'over' }} what the router predicts for this route.
+          </p>
+
+          <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div>
+              <dt class="text-slate-400">Expected</dt>
+              <dd class="text-slate-700">{{ formatSeconds(vsExpected.expectedSeconds) }}</dd>
+            </div>
+            <div>
+              <dt class="text-slate-400">Actual</dt>
+              <dd class="text-slate-700">{{ formatSeconds(vsExpected.actualSeconds) }}</dd>
+            </div>
+          </dl>
+        </div>
       </div>
 
       <div class="mt-4">

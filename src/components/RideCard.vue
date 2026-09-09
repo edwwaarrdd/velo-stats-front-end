@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import type { Ride } from '../api/types'
+import { computed } from 'vue'
 import type { RideBadge } from '../lib/insights'
-import { formatDateTime, formatDistance, formatDuration, formatSpeed } from '../lib/format'
+import { expectedTimeComparison } from '../lib/insights'
+import { formatDateTime, formatDistance, formatDuration, formatSeconds, formatSpeed } from '../lib/format'
 import WeatherBadge from './WeatherBadge.vue'
 
 const props = defineProps<{ ride: Ride; badge?: RideBadge }>()
 const router = useRouter()
+
+const vsExpected = computed(() => expectedTimeComparison(props.ride))
 
 function openDetail() {
   router.push({ name: 'ride-detail', params: { rideId: props.ride.ride_id } })
@@ -58,6 +62,15 @@ const badgeStyles: Record<string, string> = {
       <span>⏱ {{ formatDuration(ride.duration) }}</span>
       <span>📏 {{ formatDistance(ride.distance_meters) }}</span>
       <span>⚡ {{ formatSpeed(ride.speed_kmh) }}</span>
+      <span
+        v-if="vsExpected"
+        :class="vsExpected.faster ? 'text-emerald-600' : 'text-rose-600'"
+        :title="`Router expected ${formatSeconds(vsExpected.expectedSeconds)} for this route`"
+      >
+        {{ vsExpected.faster ? '🏁' : '🐢' }}
+        {{ formatSeconds(Math.abs(vsExpected.deltaSeconds)) }}
+        {{ vsExpected.faster ? 'faster' : 'slower' }} than expected
+      </span>
       <span v-if="ride.bike_number">🚲 #{{ ride.bike_number }}</span>
       <WeatherBadge :weather="ride.weather" />
     </div>
