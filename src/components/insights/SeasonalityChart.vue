@@ -6,10 +6,17 @@ import { formatDistance, formatDuration } from '../../lib/format'
 
 const props = defineProps<{ rides: Ride[] }>()
 
+const CHART_HEIGHT_PX = 128
+
 const months = computed(() => monthlyDistance(props.rides))
 const best = computed(() => bestMonth(months.value))
 const winter = computed(() => winterStats(props.rides))
 const maxMeters = computed(() => Math.max(...months.value.map((m) => m.totalMeters), 1))
+
+function barHeightPx(meters: number): number {
+  if (meters <= 0) return 0
+  return Math.max((meters / maxMeters.value) * CHART_HEIGHT_PX, 2)
+}
 </script>
 
 <template>
@@ -21,15 +28,11 @@ const maxMeters = computed(() => Math.max(...months.value.map((m) => m.totalMete
       <div
         v-for="month in months"
         :key="month.key"
-        class="flex min-w-[10px] flex-1 flex-col items-center justify-end"
+        class="min-w-[10px] flex-1 rounded-t bg-sky-500"
+        :class="{ 'bg-emerald-500': best && month.key === best.key }"
+        :style="{ height: `${barHeightPx(month.totalMeters)}px` }"
         :title="`${month.label}: ${formatDistance(month.totalMeters)} over ${month.rideCount} rides`"
-      >
-        <div
-          class="w-full rounded-t bg-sky-500"
-          :class="{ 'bg-emerald-500': best && month.key === best.key }"
-          :style="{ height: `${(month.totalMeters / maxMeters) * 100}%`, minHeight: month.totalMeters > 0 ? '2px' : '0' }"
-        />
-      </div>
+      />
     </div>
 
     <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
