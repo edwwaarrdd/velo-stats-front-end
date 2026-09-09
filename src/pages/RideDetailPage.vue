@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useRides } from '../composables/useRides'
 import StatTile from '../components/StatTile.vue'
+import RideRouteMap from '../components/RideRouteMap.vue'
 import { COLD_THRESHOLD_C, HOT_THRESHOLD_C, rideHardcoreTags } from '../lib/insights'
 import {
   formatDate,
@@ -83,6 +84,10 @@ const hardcoreReasons = computed(() => {
         <StatTile label="Distance" :value="formatDistance(ride.distance_meters)" />
         <StatTile label="Speed" :value="formatSpeed(ride.speed_kmh)" />
         <StatTile label="Pace" :value="pace ? `${pace.toFixed(1)} min/km` : '—'" />
+      </div>
+
+      <div class="mt-4">
+        <RideRouteMap :ride="ride" />
       </div>
 
       <div class="mt-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
