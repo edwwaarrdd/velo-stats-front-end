@@ -26,10 +26,12 @@ const { rideById, loading, error } = useRides()
 const rideId = computed(() => Number(route.params.rideId))
 const ride = computed(() => rideById.value.get(rideId.value) ?? null)
 
+// Derived from the exact ride time, not the `duration` field, which truncates
+// to whole minutes and so flatters the pace.
 const pace = computed(() => {
   const r = ride.value
-  if (!r || !r.distance_meters || !r.duration) return null
-  return r.duration / (r.distance_meters / 1000)
+  if (!r || !r.distance_meters || !r.actual_duration_seconds) return null
+  return r.actual_duration_seconds / 60 / (r.distance_meters / 1000)
 })
 
 const vsExpected = computed(() => (ride.value ? expectedTimeComparison(ride.value) : null))
