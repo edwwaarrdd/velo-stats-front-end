@@ -310,10 +310,7 @@ export interface ExpectedTimeComparison {
   faster: boolean;
 }
 
-/**
- * Compares how long the ride actually took against the time the OSRM router
- * expects for the same route. A negative delta means faster than expected.
- */
+/** A negative delta means faster than the OSRM router expected. */
 export function expectedTimeComparison(ride: Ride): ExpectedTimeComparison | null {
   const expectedSeconds = ride.expected_duration_seconds;
   const actualSeconds = ride.actual_duration_seconds;
