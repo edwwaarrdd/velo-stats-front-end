@@ -1,6 +1,6 @@
 # velo-stats-front-end
 
-A Vue 3 + TypeScript + Tailwind CSS front-end for the [velo-stats-python](../velo-stats-python) API — a summary and browsable history of bike-share rides.
+A Vue 3 + TypeScript + Tailwind CSS front-end for the [velo-stats-python](../velo-stats-python) API — a summary and browsable history of bike-share rides. Every ride it shows combines the ride export with weather data from the free Open-Meteo archive and cycling distances from the public OSRM routing API.
 
 ## Features
 
