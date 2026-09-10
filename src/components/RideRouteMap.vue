@@ -1,35 +1,37 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, watch, ref } from 'vue'
-import L from 'leaflet'
-import type { Ride } from '../api/types'
-import { useStations } from '../composables/useStations'
+import { nextTick, onBeforeUnmount, onMounted, watch, ref } from 'vue';
+import L from 'leaflet';
+import type { Ride } from '../api/types';
+import { useStations } from '../composables/useStations';
 
-const props = defineProps<{ ride: Ride }>()
+const props = defineProps<{ ride: Ride }>();
 
-const { stationByCode, loading: stationsLoading } = useStations()
+const { stationByCode, loading: stationsLoading } = useStations();
 
-const mapContainer = ref<HTMLDivElement | null>(null)
-let map: L.Map | null = null
-let layer: L.LayerGroup | null = null
+const mapContainer = ref<HTMLDivElement | null>(null);
+let map: L.Map | null = null;
+let layer: L.LayerGroup | null = null;
 
-const ANTWERP_CENTER: [number, number] = [51.2194, 4.4025]
+const ANTWERP_CENTER: [number, number] = [51.2194, 4.4025];
 
 function render() {
-  if (!map) return
+  if (!map) return;
   if (layer) {
-    map.removeLayer(layer)
-    layer = null
+    map.removeLayer(layer);
+    layer = null;
   }
 
-  const origin = props.ride.origin_station_code ? stationByCode.value.get(props.ride.origin_station_code) : null
+  const origin = props.ride.origin_station_code
+    ? stationByCode.value.get(props.ride.origin_station_code)
+    : null;
   const destination = props.ride.destination_station_code
     ? stationByCode.value.get(props.ride.destination_station_code)
-    : null
+    : null;
 
-  if (!origin) return
+  if (!origin) return;
 
-  const group = L.layerGroup()
-  const isRoundTrip = destination && origin.station_id === destination.station_id
+  const group = L.layerGroup();
+  const isRoundTrip = destination && origin.station_id === destination.station_id;
 
   L.circleMarker([origin.lat, origin.lon], {
     radius: 9,
@@ -38,8 +40,12 @@ function render() {
     fillColor: '#16a34a',
     fillOpacity: 1,
   })
-    .bindTooltip(isRoundTrip ? `Start & end: ${origin.name}` : `Start: ${origin.name}`, { permanent: true, direction: 'top', offset: [0, -6] })
-    .addTo(group)
+    .bindTooltip(isRoundTrip ? `Start & end: ${origin.name}` : `Start: ${origin.name}`, {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -6],
+    })
+    .addTo(group);
 
   if (destination && !isRoundTrip) {
     L.circleMarker([destination.lat, destination.lon], {
@@ -50,7 +56,7 @@ function render() {
       fillOpacity: 1,
     })
       .bindTooltip(`End: ${destination.name}`, { permanent: true, direction: 'top', offset: [0, -6] })
-      .addTo(group)
+      .addTo(group);
 
     L.polyline(
       [
@@ -58,39 +64,39 @@ function render() {
         [destination.lat, destination.lon],
       ],
       { color: '#0284c7', weight: 3, opacity: 0.7, dashArray: '6 8' },
-    ).addTo(group)
+    ).addTo(group);
   }
 
-  layer = group.addTo(map)
+  layer = group.addTo(map);
 
-  const points: L.LatLngExpression[] = [[origin.lat, origin.lon]]
-  if (destination && !isRoundTrip) points.push([destination.lat, destination.lon])
+  const points: L.LatLngExpression[] = [[origin.lat, origin.lon]];
+  if (destination && !isRoundTrip) points.push([destination.lat, destination.lon]);
   if (points.length > 1) {
-    map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 16 })
+    map.fitBounds(L.latLngBounds(points), { padding: [40, 40], maxZoom: 16 });
   } else {
-    map.setView(points[0], 15)
+    map.setView(points[0], 15);
   }
 }
 
 onMounted(async () => {
-  if (!mapContainer.value) return
-  map = L.map(mapContainer.value).setView(ANTWERP_CENTER, 13)
+  if (!mapContainer.value) return;
+  map = L.map(mapContainer.value).setView(ANTWERP_CENTER, 13);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19,
-  }).addTo(map)
+  }).addTo(map);
 
-  await nextTick()
-  map.invalidateSize()
-  render()
-})
+  await nextTick();
+  map.invalidateSize();
+  render();
+});
 
 onBeforeUnmount(() => {
-  map?.remove()
-  map = null
-})
+  map?.remove();
+  map = null;
+});
 
-watch([() => props.ride, stationByCode], render)
+watch([() => props.ride, stationByCode], render);
 </script>
 
 <template>

@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { useRides } from '../composables/useRides'
-import CommuteHeatmap from '../components/insights/CommuteHeatmap.vue'
-import StationMap from '../components/insights/StationMap.vue'
-import StationLeaderboard from '../components/insights/StationLeaderboard.vue'
-import SeasonalityChart from '../components/insights/SeasonalityChart.vue'
-import HardcoreFactor from '../components/insights/HardcoreFactor.vue'
-import RouterComparison from '../components/insights/RouterComparison.vue'
-import BikeStats from '../components/insights/BikeStats.vue'
+import { useRides } from '../composables/useRides';
+import CommuteHeatmap from '../components/insights/CommuteHeatmap.vue';
+import StationMap from '../components/insights/StationMap.vue';
+import StationLeaderboard from '../components/insights/StationLeaderboard.vue';
+import SeasonalityChart from '../components/insights/SeasonalityChart.vue';
+import HardcoreFactor from '../components/insights/HardcoreFactor.vue';
+import RouterComparison from '../components/insights/RouterComparison.vue';
+import BikeStats from '../components/insights/BikeStats.vue';
 
-const { rides, loading, error } = useRides()
+const { rides, loading, error } = useRides();
 </script>
 
 <template>
   <div class="mx-auto max-w-4xl px-4 py-8">
-    <router-link to="/" class="text-sm font-medium text-sky-600 hover:text-sky-700">← Back to all rides</router-link>
+    <router-link to="/" class="text-sm font-medium text-sky-600 hover:text-sky-700"
+      >← Back to all rides</router-link
+    >
 
     <h1 class="mt-3 text-2xl font-bold text-slate-900">📊 Insights</h1>
     <p class="mt-1 text-sm text-slate-500">Patterns hiding in your ride history.</p>

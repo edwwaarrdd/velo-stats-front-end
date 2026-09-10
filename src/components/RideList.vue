@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Ride } from '../api/types'
-import { computeRideBadges } from '../lib/insights'
-import RideCard from './RideCard.vue'
+import { computed } from 'vue';
+import type { Ride } from '../api/types';
+import { computeRideBadges } from '../lib/insights';
+import RideCard from './RideCard.vue';
 
 const props = defineProps<{
-  rides: Ride[]
-  loading: boolean
-  error: string | null
-}>()
+  rides: Ride[];
+  loading: boolean;
+  error: string | null;
+}>();
 
-const badges = computed(() => computeRideBadges(props.rides))
+const badges = computed(() => computeRideBadges(props.rides));
 </script>
 
 <template>
@@ -23,7 +23,10 @@ const badges = computed(() => computeRideBadges(props.rides))
       Couldn't load rides: {{ error }}
     </p>
 
-    <p v-else-if="rides.length === 0" class="rounded-xl bg-white p-6 text-center text-sm text-slate-500 ring-1 ring-slate-200">
+    <p
+      v-else-if="rides.length === 0"
+      class="rounded-xl bg-white p-6 text-center text-sm text-slate-500 ring-1 ring-slate-200"
+    >
       No rides recorded yet.
     </p>
 

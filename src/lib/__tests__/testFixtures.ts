@@ -1,6 +1,6 @@
-import type { Ride, Weather } from '../../api/types'
+import type { Ride, Weather } from '../../api/types';
 
-let nextId = 1
+let nextId = 1;
 
 export function makeWeather(overrides: Partial<Weather> = {}): Weather {
   return {
@@ -17,11 +17,11 @@ export function makeWeather(overrides: Partial<Weather> = {}): Weather {
     weather_code: 1,
     observed_at: '2026-06-01T12:00:00Z',
     ...overrides,
-  }
+  };
 }
 
 export function makeRide(overrides: Partial<Ride> = {}): Ride {
-  const id = nextId++
+  const id = nextId++;
   return {
     ride_id: id,
     account_id: 1,
@@ -43,5 +43,5 @@ export function makeRide(overrides: Partial<Ride> = {}): Ride {
     duration_vs_expected_seconds: 100,
     weather: makeWeather(),
     ...overrides,
-  }
+  };
 }

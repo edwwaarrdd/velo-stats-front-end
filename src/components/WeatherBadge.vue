@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { Weather } from '../api/types'
-import { weatherCodeInfo } from '../lib/format'
+import type { Weather } from '../api/types';
+import { weatherCodeInfo } from '../lib/format';
 
 const props = defineProps<{
-  weather: Weather | null
-}>()
+  weather: Weather | null;
+}>();
 
-const info = weatherCodeInfo(props.weather?.weather_code ?? null)
+const info = weatherCodeInfo(props.weather?.weather_code ?? null);
 </script>
 
 <template>

@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import type { RideCost, RideSummary } from '../api/types'
-import { formatDistance, formatDuration, formatEur } from '../lib/format'
-import StatTile from './StatTile.vue'
+import type { RideCost, RideSummary } from '../api/types';
+import { formatDistance, formatDuration, formatEur } from '../lib/format';
+import StatTile from './StatTile.vue';
 
 defineProps<{
-  summary: RideSummary | null
-  cost: RideCost | null
-  loading: boolean
-}>()
+  summary: RideSummary | null;
+  cost: RideCost | null;
+  loading: boolean;
+}>();
 
 function averageSpeed(summary: RideSummary): number | null {
-  if (!summary.total_distance_meters || !summary.total_duration) return null
-  return (summary.total_distance_meters / 1000) / (summary.total_duration / 60)
+  if (!summary.total_distance_meters || !summary.total_duration) return null;
+  return summary.total_distance_meters / 1000 / (summary.total_duration / 60);
 }
 </script>
 
@@ -19,7 +19,9 @@ function averageSpeed(summary: RideSummary): number | null {
   <div>
     <div class="flex flex-wrap items-baseline justify-between gap-2">
       <h1 class="text-2xl font-bold text-slate-900">🚲 Velo Stats</h1>
-      <router-link to="/insights" class="text-sm font-medium text-sky-600 hover:text-sky-700">📊 View insights →</router-link>
+      <router-link to="/insights" class="text-sm font-medium text-sky-600 hover:text-sky-700"
+        >📊 View insights →</router-link
+      >
     </div>
     <p class="mt-1 text-sm text-slate-500">A look back at every ride, one summary tile at a time.</p>
 

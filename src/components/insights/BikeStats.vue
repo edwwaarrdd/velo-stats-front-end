@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Ride } from '../../api/types'
-import { bikeStats } from '../../lib/insights'
+import { computed } from 'vue';
+import type { Ride } from '../../api/types';
+import { bikeStats } from '../../lib/insights';
 
-const props = defineProps<{ rides: Ride[] }>()
+const props = defineProps<{ rides: Ride[] }>();
 
-const stats = computed(() => bikeStats(props.rides))
+const stats = computed(() => bikeStats(props.rides));
 </script>
 
 <template>
@@ -24,8 +24,8 @@ const stats = computed(() => bikeStats(props.rides))
     </div>
 
     <p v-if="stats.mostRidden" class="mt-3 text-sm text-slate-600">
-      Your most-ridden bike is <span class="font-medium text-slate-800">#{{ stats.mostRidden.bike }}</span>,
-      {{ stats.mostRidden.count }} times.
+      Your most-ridden bike is <span class="font-medium text-slate-800">#{{ stats.mostRidden.bike }}</span
+      >, {{ stats.mostRidden.count }} times.
     </p>
 
     <ul v-if="stats.topBikes.length > 1" class="mt-3 space-y-1 text-sm text-slate-500">

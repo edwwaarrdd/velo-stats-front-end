@@ -1,61 +1,61 @@
 export function formatDuration(minutes: number | null): string {
-  if (minutes === null) return '—'
-  const hours = Math.floor(minutes / 60)
-  const mins = Math.round(minutes % 60)
-  if (hours === 0) return `${mins}m`
-  return `${hours}h ${String(mins).padStart(2, '0')}m`
+  if (minutes === null) return '—';
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+  if (hours === 0) return `${mins}m`;
+  return `${hours}h ${String(mins).padStart(2, '0')}m`;
 }
 
 export function formatDistance(meters: number | null): string {
-  if (meters === null) return '—'
-  if (meters < 1000) return `${Math.round(meters)} m`
-  return `${(meters / 1000).toFixed(2)} km`
+  if (meters === null) return '—';
+  if (meters < 1000) return `${Math.round(meters)} m`;
+  return `${(meters / 1000).toFixed(2)} km`;
 }
 
 export function formatSeconds(seconds: number | null): string {
-  if (seconds === null) return '—'
-  const total = Math.round(Math.abs(seconds))
-  const minutes = Math.floor(total / 60)
-  const rest = total % 60
-  const sign = seconds < 0 ? '-' : ''
-  if (minutes === 0) return `${sign}${rest}s`
-  return `${sign}${minutes}m ${String(rest).padStart(2, '0')}s`
+  if (seconds === null) return '—';
+  const total = Math.round(Math.abs(seconds));
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  const sign = seconds < 0 ? '-' : '';
+  if (minutes === 0) return `${sign}${rest}s`;
+  return `${sign}${minutes}m ${String(rest).padStart(2, '0')}s`;
 }
 
 export function formatSpeed(kmh: number | null): string {
-  if (kmh === null) return '—'
-  return `${kmh.toFixed(1)} km/h`
+  if (kmh === null) return '—';
+  return `${kmh.toFixed(1)} km/h`;
 }
 
 export function formatDateTime(iso: string | null): string {
-  if (iso === null) return '—'
+  if (iso === null) return '—';
   return new Date(iso).toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
-  })
+  });
 }
 
 export function formatDate(iso: string | null): string {
-  if (iso === null) return '—'
-  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' })
+  if (iso === null) return '—';
+  return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
 }
 
 export function formatTime(iso: string | null): string {
-  if (iso === null) return '—'
-  return new Date(iso).toLocaleTimeString(undefined, { timeStyle: 'short' })
+  if (iso === null) return '—';
+  return new Date(iso).toLocaleTimeString(undefined, { timeStyle: 'short' });
 }
 
 export function formatEur(value: number | null): string {
-  if (value === null) return '—'
+  if (value === null) return '—';
   return new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: 'EUR',
-  }).format(value)
+  }).format(value);
 }
 
 interface WeatherCodeInfo {
-  label: string
-  icon: string
+  label: string;
+  icon: string;
 }
 
 const WEATHER_CODES: Record<number, WeatherCodeInfo> = {
@@ -87,11 +87,11 @@ const WEATHER_CODES: Record<number, WeatherCodeInfo> = {
   95: { label: 'Thunderstorm', icon: '⛈️' },
   96: { label: 'Thunderstorm with slight hail', icon: '⛈️' },
   99: { label: 'Thunderstorm with heavy hail', icon: '⛈️' },
-}
+};
 
 export function weatherCodeInfo(code: number | null): WeatherCodeInfo {
   if (code === null || !(code in WEATHER_CODES)) {
-    return { label: 'Unknown', icon: '❔' }
+    return { label: 'Unknown', icon: '❔' };
   }
-  return WEATHER_CODES[code]
+  return WEATHER_CODES[code];
 }

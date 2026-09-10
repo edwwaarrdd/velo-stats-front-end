@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { useCost } from '../composables/useCost'
-import { useRides } from '../composables/useRides'
-import { useSummary } from '../composables/useSummary'
-import RideList from '../components/RideList.vue'
-import SummaryHeader from '../components/SummaryHeader.vue'
+import { useCost } from '../composables/useCost';
+import { useRides } from '../composables/useRides';
+import { useSummary } from '../composables/useSummary';
+import RideList from '../components/RideList.vue';
+import SummaryHeader from '../components/SummaryHeader.vue';
 
-const { rides, loading: ridesLoading, error: ridesError } = useRides()
-const { summary, loading: summaryLoading } = useSummary()
-const { cost, loading: costLoading } = useCost()
+const { rides, loading: ridesLoading, error: ridesError } = useRides();
+const { summary, loading: summaryLoading } = useSummary();
+const { cost, loading: costLoading } = useCost();
 </script>
 
 <template>

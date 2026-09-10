@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useRides } from '../composables/useRides'
-import StatTile from '../components/StatTile.vue'
-import RideRouteMap from '../components/RideRouteMap.vue'
-import {
-  COLD_THRESHOLD_C,
-  HOT_THRESHOLD_C,
-  expectedTimeComparison,
-  rideHardcoreTags,
-} from '../lib/insights'
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useRides } from '../composables/useRides';
+import StatTile from '../components/StatTile.vue';
+import RideRouteMap from '../components/RideRouteMap.vue';
+import { COLD_THRESHOLD_C, HOT_THRESHOLD_C, expectedTimeComparison, rideHardcoreTags } from '../lib/insights';
 import {
   formatDate,
   formatDistance,
@@ -18,39 +13,41 @@ import {
   formatSpeed,
   formatTime,
   weatherCodeInfo,
-} from '../lib/format'
+} from '../lib/format';
 
-const route = useRoute()
-const { rideById, loading, error } = useRides()
+const route = useRoute();
+const { rideById, loading, error } = useRides();
 
-const rideId = computed(() => Number(route.params.rideId))
-const ride = computed(() => rideById.value.get(rideId.value) ?? null)
+const rideId = computed(() => Number(route.params.rideId));
+const ride = computed(() => rideById.value.get(rideId.value) ?? null);
 
 // Derived from the exact ride time, not the `duration` field, which truncates
 // to whole minutes and so flatters the pace.
 const pace = computed(() => {
-  const r = ride.value
-  if (!r || !r.distance_meters || !r.actual_duration_seconds) return null
-  return r.actual_duration_seconds / 60 / (r.distance_meters / 1000)
-})
+  const r = ride.value;
+  if (!r || !r.distance_meters || !r.actual_duration_seconds) return null;
+  return r.actual_duration_seconds / 60 / (r.distance_meters / 1000);
+});
 
-const vsExpected = computed(() => (ride.value ? expectedTimeComparison(ride.value) : null))
+const vsExpected = computed(() => (ride.value ? expectedTimeComparison(ride.value) : null));
 
-const weatherInfo = computed(() => weatherCodeInfo(ride.value?.weather?.weather_code ?? null))
-const hardcore = computed(() => (ride.value ? rideHardcoreTags(ride.value) : null))
+const weatherInfo = computed(() => weatherCodeInfo(ride.value?.weather?.weather_code ?? null));
+const hardcore = computed(() => (ride.value ? rideHardcoreTags(ride.value) : null));
 const hardcoreReasons = computed(() => {
-  if (!hardcore.value) return []
-  const reasons: string[] = []
-  if (hardcore.value.rain) reasons.push('rode in rain')
-  if (hardcore.value.cold) reasons.push(`rode below ${COLD_THRESHOLD_C}°C`)
-  if (hardcore.value.hot) reasons.push(`rode above ${HOT_THRESHOLD_C}°C`)
-  return reasons
-})
+  if (!hardcore.value) return [];
+  const reasons: string[] = [];
+  if (hardcore.value.rain) reasons.push('rode in rain');
+  if (hardcore.value.cold) reasons.push(`rode below ${COLD_THRESHOLD_C}°C`);
+  if (hardcore.value.hot) reasons.push(`rode above ${HOT_THRESHOLD_C}°C`);
+  return reasons;
+});
 </script>
 
 <template>
   <div class="mx-auto max-w-2xl px-4 py-8">
-    <router-link to="/" class="text-sm font-medium text-sky-600 hover:text-sky-700">← Back to all rides</router-link>
+    <router-link to="/" class="text-sm font-medium text-sky-600 hover:text-sky-700"
+      >← Back to all rides</router-link
+    >
 
     <div v-if="loading" class="mt-6 h-64 animate-pulse rounded-xl bg-slate-100" />
 
@@ -58,14 +55,19 @@ const hardcoreReasons = computed(() => {
       Couldn't load ride: {{ error }}
     </p>
 
-    <p v-else-if="!ride" class="mt-6 rounded-xl bg-white p-6 text-center text-sm text-slate-500 ring-1 ring-slate-200">
+    <p
+      v-else-if="!ride"
+      class="mt-6 rounded-xl bg-white p-6 text-center text-sm text-slate-500 ring-1 ring-slate-200"
+    >
       Ride not found.
     </p>
 
     <div v-else class="mt-4">
       <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <div class="flex items-center justify-between gap-2">
-          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
+          <span
+            class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 ring-1 ring-slate-200"
+          >
             {{ ride.status }}
           </span>
           <span v-if="ride.bike_number" class="text-xs text-slate-400">Bike #{{ ride.bike_number }}</span>
@@ -79,13 +81,21 @@ const hardcoreReasons = computed(() => {
 
         <dl class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-500">
           <dt>Checked out</dt>
-          <dd class="text-right text-slate-700">{{ formatDate(ride.checkout_time) }} · {{ formatTime(ride.checkout_time) }}</dd>
+          <dd class="text-right text-slate-700">
+            {{ formatDate(ride.checkout_time) }} · {{ formatTime(ride.checkout_time) }}
+          </dd>
           <dt>Checked in</dt>
-          <dd class="text-right text-slate-700">{{ formatDate(ride.checkin_time) }} · {{ formatTime(ride.checkin_time) }}</dd>
+          <dd class="text-right text-slate-700">
+            {{ formatDate(ride.checkin_time) }} · {{ formatTime(ride.checkin_time) }}
+          </dd>
           <dt v-if="ride.origin_station_code">Origin station code</dt>
-          <dd v-if="ride.origin_station_code" class="text-right text-slate-700">{{ ride.origin_station_code }}</dd>
+          <dd v-if="ride.origin_station_code" class="text-right text-slate-700">
+            {{ ride.origin_station_code }}
+          </dd>
           <dt v-if="ride.destination_station_code">Destination station code</dt>
-          <dd v-if="ride.destination_station_code" class="text-right text-slate-700">{{ ride.destination_station_code }}</dd>
+          <dd v-if="ride.destination_station_code" class="text-right text-slate-700">
+            {{ ride.destination_station_code }}
+          </dd>
         </dl>
       </div>
 
@@ -97,7 +107,9 @@ const hardcoreReasons = computed(() => {
       </div>
 
       <div class="mt-4 rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Versus the expected ride time</h2>
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Versus the expected ride time
+        </h2>
 
         <p v-if="!vsExpected" class="mt-3 text-sm text-slate-400">
           No cached route for this trip, so there is nothing to compare against.
@@ -113,8 +125,8 @@ const hardcoreReasons = computed(() => {
             {{ vsExpected.faster ? 'faster' : 'slower' }}
           </p>
           <p class="text-sm text-slate-500">
-            {{ Math.abs(vsExpected.percentage).toFixed(1) }}%
-            {{ vsExpected.faster ? 'under' : 'over' }} what the router predicts for this route.
+            {{ Math.abs(vsExpected.percentage).toFixed(1) }}% {{ vsExpected.faster ? 'under' : 'over' }} what
+            the router predicts for this route.
           </p>
 
           <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
@@ -154,9 +166,13 @@ const hardcoreReasons = computed(() => {
           <div class="mt-2 flex items-center gap-2 text-2xl font-semibold text-slate-900">
             <span>{{ weatherInfo.icon }}</span>
             <span>{{ ride.weather.temperature_c?.toFixed(1) ?? '—' }}°C</span>
-            <span class="text-sm font-normal text-slate-400">feels like {{ ride.weather.apparent_temperature_c?.toFixed(1) ?? '—' }}°C</span>
+            <span class="text-sm font-normal text-slate-400"
+              >feels like {{ ride.weather.apparent_temperature_c?.toFixed(1) ?? '—' }}°C</span
+            >
           </div>
-          <p class="text-sm text-slate-500">{{ weatherInfo.label }} · observed {{ formatTime(ride.weather.observed_at) }}</p>
+          <p class="text-sm text-slate-500">
+            {{ weatherInfo.label }} · observed {{ formatTime(ride.weather.observed_at) }}
+          </p>
           <p v-if="hardcore?.isHardcore" class="mt-1 text-sm text-orange-600">
             You {{ hardcoreReasons.join(' and ') }} on this one.
           </p>

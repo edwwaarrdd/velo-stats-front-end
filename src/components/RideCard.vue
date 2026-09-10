@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import type { Ride } from '../api/types'
-import { computed } from 'vue'
-import type { RideBadge } from '../lib/insights'
-import { expectedTimeComparison } from '../lib/insights'
-import { formatDateTime, formatDistance, formatDuration, formatSeconds, formatSpeed } from '../lib/format'
-import WeatherBadge from './WeatherBadge.vue'
+import { useRouter } from 'vue-router';
+import type { Ride } from '../api/types';
+import { computed } from 'vue';
+import type { RideBadge } from '../lib/insights';
+import { expectedTimeComparison } from '../lib/insights';
+import { formatDateTime, formatDistance, formatDuration, formatSeconds, formatSpeed } from '../lib/format';
+import WeatherBadge from './WeatherBadge.vue';
 
-const props = defineProps<{ ride: Ride; badge?: RideBadge }>()
-const router = useRouter()
+const props = defineProps<{ ride: Ride; badge?: RideBadge }>();
+const router = useRouter();
 
-const vsExpected = computed(() => expectedTimeComparison(props.ride))
+const vsExpected = computed(() => expectedTimeComparison(props.ride));
 
 function openDetail() {
-  router.push({ name: 'ride-detail', params: { rideId: props.ride.ride_id } })
+  router.push({ name: 'ride-detail', params: { rideId: props.ride.ride_id } });
 }
 
 const badgeStyles: Record<string, string> = {
@@ -23,7 +23,7 @@ const badgeStyles: Record<string, string> = {
   shortest: 'bg-purple-50 text-purple-700 ring-purple-200',
   hardcore: 'bg-orange-50 text-orange-700 ring-orange-200',
   'round-trip': 'bg-sky-50 text-sky-700 ring-sky-200',
-}
+};
 </script>
 
 <template>

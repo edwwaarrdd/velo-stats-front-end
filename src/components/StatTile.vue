@@ -1,10 +1,10 @@
 <script setup lang="ts">
 defineProps<{
-  label: string
-  value: string
-  hint?: string
-  accent?: 'default' | 'positive'
-}>()
+  label: string;
+  value: string;
+  hint?: string;
+  accent?: 'default' | 'positive';
+}>();
 </script>
 
 <template>
